@@ -14,6 +14,7 @@ int main() {
     //sim.parallelBenchmark(1);
     //sim.generateInstance();
     //sim.convertIgdpInstances();
+    //sim.convertDbdpInstances();
 
     return 0;
 }

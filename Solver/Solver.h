@@ -87,6 +87,8 @@ public:
     struct Configuration {
         enum Algorithm { Greedy, TreeSearch, DynamicProgramming, LocalSearch, Genetic, MathematicallProgramming };
 
+        enum Model { TransitivityModel, SequentialModel };
+
 
         Configuration() {}
 
@@ -98,13 +100,16 @@ public:
             String threadNum(std::to_string(threadNumPerWorker));
             std::ostringstream oss;
             oss << "alg=" << alg
-                << ";job=" << threadNum;
+                << ";job=" << threadNum
+                << ";m=" << model;
             return oss.str();
         }
 
 
-        Algorithm alg = Configuration::Algorithm::Greedy; // OPTIMIZE[szx][3]: make it a list to specify a series of algorithms to be used by each threads in sequence.
+        Algorithm alg = Algorithm::Greedy; // OPTIMIZE[szx][3]: make it a list to specify a series of algorithms to be used by each threads in sequence.
         int threadNumPerWorker = (std::min)(1, static_cast<int>(std::thread::hardware_concurrency()));
+
+        Model model = Model::TransitivityModel;
     };
 
     // describe the requirements to the input and output data interface.

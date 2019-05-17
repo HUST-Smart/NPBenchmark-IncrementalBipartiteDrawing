@@ -86,8 +86,9 @@ public:
         InstanceTrait trait;
         generateInstance(trait);
     }
-    void convertIgdpInstance(const String &igdpPath, int index);
+    void convertIgdpInstance(const String &igdpPath, int index, bool isDbdp = false);
     void convertIgdpInstances();
+    void convertDbdpInstances();
     #pragma endregion Method
 
     #pragma region Field

@@ -307,8 +307,8 @@ bool Solver::optimize(Solution &sln, ID workerId) {
 
     bool status = false;
 
-    //status = optimizeAsIs(sln);
-    status = optimizeRandomly(sln);
+    status = optimizeAsIs(sln);
+    //status = optimizeRandomly(sln);
     //status = optimizePlainModel(sln);
 
     Log(LogSwitch::Szx::Framework) << "worker " << workerId << " ends." << endl;
@@ -373,10 +373,12 @@ bool Solver::optimizePlainModel(Solution &sln) {
     Arr<Arr2D<Arr2D<MpSolver::DecisionVar>>> isCrossing(input.layerNum()); // isCrossing[l][n][m][u][v] == ture means edge i-u and j-v cross where node i, j in layer l and node u, v in layer (l + 1).
     for (ID l = 0; l < input.layerNum(); ++l) {
         const pb::IncrementalGraphDrawing::Layer &layer(input.layers(l));
-        position[l].init(layer.nodenum());
+        if (cfg.model == Configuration::Model::SequentialModel) { position[l].init(layer.nodenum()); }
         isPrior[l].init(layer.nodenum(), layer.nodenum());
         for (ID n = 0; n < layer.nodenum(); ++n) {
-            position[l][n] = mp.addVar(MpSolver::VariableType::Real, 0, layer.nodenum() - 1, 0);
+            if(cfg.model == Configuration::Model::SequentialModel) {
+                position[l][n] = mp.addVar(MpSolver::VariableType::Real, 0, layer.nodenum() - 1, 0);
+            }
             //for (ID m = max(n + 1, layer.oldnodenum()); m < layer.nodenum(); ++m) { // skip node n >= m or they are both old nodes.
             //    isPrior[l][n][m] = mp.addVar(MpSolver::VariableType::Bool, 0, 1, 0);
             //}
@@ -426,13 +428,28 @@ bool Solver::optimizePlainModel(Solution &sln) {
     }
 
     // ordering.
-    for (ID l = 0; l < input.layerNum(); ++l) {
-        const pb::IncrementalGraphDrawing::Layer &layer(input.layers(l));
-        for (ID n = 0; n < layer.nodenum(); ++n) {
-            for (ID m = n + 1; m < layer.nodenum(); ++m) {
-                MpSolver::LinearExpr diff = position[l][m] - position[l][n];
-                mp.addConstraint(layer.nodenum() * (isPrior[l][n][m] - 1) + isPrior[l][n][m] <= diff);
-                mp.addConstraint(diff <= layer.nodenum() * isPrior[l][n][m] + (isPrior[l][n][m] - 1));
+    if (cfg.model == Configuration::Model::TransitivityModel) {
+        for (ID l = 0; l < input.layerNum(); ++l) {
+            const pb::IncrementalGraphDrawing::Layer &layer(input.layers(l));
+            for (ID n = 0; n < layer.nodenum(); ++n) {
+                for (ID m = n + 1; m < layer.nodenum(); ++m) {
+                    for (ID u = m + 1; u < layer.nodenum(); ++u) {
+                        MpSolver::LinearExpr diff = isPrior[l][n][m] + isPrior[l][m][u] - isPrior[l][n][u];
+                        mp.addConstraint(0 <= diff);
+                        mp.addConstraint(diff <= 1);
+                    }
+                }
+            }
+        }
+    } else { // if (cfg.model == Configuration::Model::SequentialModel)
+        for (ID l = 0; l < input.layerNum(); ++l) {
+            const pb::IncrementalGraphDrawing::Layer &layer(input.layers(l));
+            for (ID n = 0; n < layer.nodenum(); ++n) {
+                for (ID m = n + 1; m < layer.nodenum(); ++m) {
+                    MpSolver::LinearExpr diff = position[l][m] - position[l][n];
+                    mp.addConstraint(layer.nodenum() * (isPrior[l][n][m] - 1) + isPrior[l][n][m] <= diff);
+                    mp.addConstraint(diff <= layer.nodenum() * isPrior[l][n][m] + (isPrior[l][n][m] - 1));
+                }
             }
         }
     }
@@ -442,6 +459,8 @@ bool Solver::optimizePlainModel(Solution &sln) {
 
     // solve model.
     mp.setOutput(true);
+    //mp.setMaxThread(1);
+    mp.setTimeLimitInSecond(1800);
 
     // record decision.
     if (mp.optimize()) {
@@ -450,9 +469,16 @@ bool Solver::optimizePlainModel(Solution &sln) {
             const pb::IncrementalGraphDrawing::Layer &layer(input.layers(l));
             auto &order(*(sln.add_orders()->mutable_nodes()));
             order.Resize(layer.nodenum(), Problem::InvalidId);
-            for (ID n = 0; n < layer.nodenum(); ++n) {
-                ID i = lround(mp.getValue(position[l][n]));
-                order[i] = n;
+            if (cfg.model == Configuration::Model::TransitivityModel) {
+                for (ID n = 0; n < layer.nodenum(); ++n) { order[n] = n; }
+                sort(order.begin(), order.end(), [&](ID n, ID m) {
+                    return (n < m) ? mp.isTrue(isPrior[l][n][m]) : !mp.isTrue(isPrior[l][m][n]);
+                });
+            } else { // if (cfg.model == Configuration::Model::SequentialModel)
+                for (ID n = 0; n < layer.nodenum(); ++n) {
+                    ID i = lround(mp.getValue(position[l][n]));
+                    order[i] = n;
+                }
             }
         }
         return true;
