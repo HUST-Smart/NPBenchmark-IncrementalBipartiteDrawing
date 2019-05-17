@@ -1,0 +1,1 @@
+{"graph":{"layers":[{"oldNodeNum":8,"nodeNum":10,"forwardLists":[{"nodes":[0,1,6]},{"nodes":[3,2,14]},{"nodes":[5,4,2,3,13]},{"nodes":[5]},{"nodes":[8,7]},{"nodes":[9,6]},{"nodes":[9,10]},{"nodes":[11]},{"nodes":[9]},{"nodes":[12]}]},{"oldNodeNum":12,"nodeNum":15,"forwardLists":[]}],"oldNodeNum":20,"nodeNum":25}}

@@ -1,0 +1,68 @@
+// # 概述
+// 使用 Google 的 Protocol Buffer (简称 protobuf) 定义.
+// 增量图绘制问题原始输入输出数据格式.
+// IncrementalGraphDrawing 定义了算法所需的全部数据.
+// IncrementalGraphDrawing.Input 定义了算法所需的全部输入数据.
+// IncrementalGraphDrawing.Output 定义了算法所需的全部输出数据, 应输出至提交文件的第二行以后.
+// IncrementalGraphDrawing.Submission 定义了向测评系统提交的计算结果文件的信息摘要, 应输出至提交文件的第一行.
+
+
+syntax = "proto3";
+
+package pb;
+
+option java_package = "pb";
+option java_outer_classname = "IncrementalGraphDrawing";
+// option cc_enable_arenas = true;
+
+
+// 主要数据.
+message IncrementalGraphDrawing {
+  message Input { // 输入.
+    LayeredGraph graph = 1; // 无向层次图.
+  }
+	
+  message Output { // 输出.
+    repeated NodeList orders = 1; // 各层次节点放置顺序列表.
+  }
+
+  message LayeredGraph { // 无向层次图信息. 各层次内节点从 0 开始连续编号. 新增节点编号大于原有节点.
+    repeated Layer layers = 1; // 层次列表.
+    int32 oldNodeNum = 2; // 所有层次原有节点总数.
+    // int32 newNodeNum = 3; //  所有层次新增节点总数.
+    int32 nodeNum = 4; // 所有层次节点总数.
+  }
+
+  message Layer { // 层次信息. 层内原始节点与新增节点的初始位置按编号从小到大依次排列.
+    int32 oldNodeNum = 1; // 原有节点数.
+    // int32 newNodeNum = 2; // 新增节点数.
+    int32 nodeNum = 3; // 总节点数.
+    repeated NodeList forwardLists = 4; // 各节点连接的下一层次中的节点列表.
+  }
+
+  message NodeList { // 节点列表信息.
+    repeated int32 nodes = 1; // 节点编号列表.
+  }
+}
+
+message Submission { // 测评系统提交信息摘要.
+  // 应在 SDK 内由提交者手工填写的数据项.
+  string author = 1; // 提交者姓名.
+  string algorithm = 2; // 算法名称.
+  string thread = 3; // 算法线程数
+  string cpu = 4; // 处理器型号与主频.
+  string ram = 5; // 内存容量与频率. (Windows 下可以使用 wmic memorychip 命令查看)
+  string language = 6; // 编程语言.
+  string compiler = 7; // 编译器.
+  string os = 8; // 操作系统
+
+  // 由 SDK 自动记录的数据项.
+  string problem = 21; // 问题名称.
+  string instance = 22; // 算例名称.
+  string duration = 23; // 求解耗时.
+
+  // 由服务器自动计算的数据项.
+  double obj = 31; // 计算结果目标函数值.
+  string email = 32; // 提交者邮箱.
+  string date = 33; // 提交时间.
+}
