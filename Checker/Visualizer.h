@@ -75,7 +75,7 @@ struct Drawer {
     }
 
     void line(double x1, double y1, double x2, double y2, const std::string &bcolor) {
-        ofs << "      <line x1='" << x1 << "' y1='" << y1 << "' x2='" << x2 << "' y2='" << y2 << "' stroke='#" << bcolor << "' stroke-width='1'/>" << std::endl;
+        ofs << "      <line x1='" << x1 << "' y1='" << y1 << "' x2='" << x2 << "' y2='" << y2 << "' stroke='#" << bcolor << "' stroke-width='0.2'/>" << std::endl;
     }
     void line(double x1, double y1, double x2, double y2, int layer) {
         static int cutWidth[] = { 10, 8, 8, 6 };

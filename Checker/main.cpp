@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     double Width = (input.graph().layers_size() - 1) * LayerGap;
     double Height = (maxLayerNodeNum - 1) * NodeGap;
     Drawer draw;
-    draw.begin("Visualization/" + outputName + ".html", -Margin, -Margin, Width + Margin, Height + 2 * Margin);
+    draw.begin("Visualization/" + outputName + ".html", -Margin, -Margin, Width + 2 * Margin, Height + 2 * Margin);
     double srcX = 0;
     for (int ll = 0, l = 1; l < input.graph().layers_size(); ++ll, ++l, srcX += LayerGap) {
         const auto &layer(input.graph().layers(ll));
