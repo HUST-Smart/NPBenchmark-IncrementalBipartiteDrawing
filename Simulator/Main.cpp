@@ -15,6 +15,8 @@ int main() {
     //sim.generateInstance();
     //sim.convertIgdpInstances();
     //sim.convertDbdpInstances();
+    //sim.convertDbdp30Instances();
+    //sim.convertDbdp1000Instances();
 
     return 0;
 }

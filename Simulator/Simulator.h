@@ -89,6 +89,8 @@ public:
     void convertIgdpInstance(const String &igdpPath, int index, bool isDbdp = false);
     void convertIgdpInstances();
     void convertDbdpInstances();
+    void convertDbdp30Instances();
+    void convertDbdp1000Instances();
     #pragma endregion Method
 
     #pragma region Field

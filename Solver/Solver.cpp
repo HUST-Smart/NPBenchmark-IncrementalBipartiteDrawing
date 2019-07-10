@@ -307,9 +307,9 @@ bool Solver::optimize(Solution &sln, ID workerId) {
 
     bool status = false;
 
-    status = optimizeAsIs(sln);
+    //status = optimizeAsIs(sln);
     //status = optimizeRandomly(sln);
-    //status = optimizePlainModel(sln);
+    status = optimizePlainModel(sln);
 
     Log(LogSwitch::Szx::Framework) << "worker " << workerId << " ends." << endl;
     return status;
@@ -319,6 +319,7 @@ bool Solver::optimizeAsIs(Solution &sln) {
     // reset solution state.
     bool status = true;
     auto &orders(*sln.mutable_orders());
+    orders.Clear();
     orders.Reserve(input.layerNum());
 
     // TODO[0]: replace the following as-is assignment with your own algorithm.
@@ -338,6 +339,7 @@ bool Solver::optimizeRandomly(Solution &sln) {
     // reset solution state.
     bool status = true;
     auto &orders(*sln.mutable_orders());
+    orders.Clear();
     orders.Reserve(input.layerNum());
 
     // TODO[0]: replace the following random assignment with your own algorithm.
@@ -363,6 +365,7 @@ bool Solver::optimizeRandomly(Solution &sln) {
 bool Solver::optimizePlainModel(Solution &sln) {
     // reset solution state.
     auto &orders(*sln.mutable_orders());
+    orders.Clear();
     orders.Reserve(input.layerNum());
 
     MpSolver mp;
@@ -447,8 +450,8 @@ bool Solver::optimizePlainModel(Solution &sln) {
             for (ID n = 0; n < layer.nodenum(); ++n) {
                 for (ID m = n + 1; m < layer.nodenum(); ++m) {
                     MpSolver::LinearExpr diff = position[l][m] - position[l][n];
-                    mp.addConstraint(layer.nodenum() * (isPrior[l][n][m] - 1) + isPrior[l][n][m] <= diff);
-                    mp.addConstraint(diff <= layer.nodenum() * isPrior[l][n][m] + (isPrior[l][n][m] - 1));
+                    mp.addConstraint(1 - layer.nodenum() * (1 - isPrior[l][n][m]) <= diff);
+                    mp.addConstraint(diff <= layer.nodenum() * isPrior[l][n][m] - 1);
                 }
             }
         }
@@ -484,7 +487,7 @@ bool Solver::optimizePlainModel(Solution &sln) {
         return true;
     }
 
-    return false;
+    return optimizeAsIs(sln);
 }
 
 ID Solver::countCrossEdge(Solution &sln) const {

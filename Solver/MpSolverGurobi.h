@@ -60,6 +60,7 @@ public:
 
     enum OptimaOrientation { Minimize = GRB_MINIMIZE, Maximize = GRB_MAXIMIZE };
 
+    // TODO[szx][0]: separate result state and error state, since there may be feasible solutions even if error occurs.
     // status for the most recent optimization.
     enum ResultStatus {
         Optimal,         // GRB_OPTIMAL
@@ -365,6 +366,8 @@ public:
     List<double> getObjectiveValues() const;
 
     int getObjectiveCount() const { return static_cast<int>(objectives.size()); }
+
+    double getBestBound() const { return model.get(GRB_DoubleAttr_ObjBoundC); }
 
     // configurations.
     void setTimeLimit(Millisecond millisecond) { setTimeLimitInSecond(millisecond / MillisecondsPerSecond); }
