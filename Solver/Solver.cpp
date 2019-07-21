@@ -380,7 +380,7 @@ bool Solver::optimizePlainModel(Solution &sln) {
         isPrior[l].init(layer.nodenum(), layer.nodenum());
         for (ID n = 0; n < layer.nodenum(); ++n) {
             if(cfg.model == Configuration::Model::SequentialModel) {
-                position[l][n] = mp.addVar(MpSolver::VariableType::Real, 0, layer.nodenum() - 1, 0);
+                position[l][n] = mp.addVar(MpSolver::VariableType::Real, 0, layer.nodenum(), 0);
             }
             //for (ID m = max(n + 1, layer.oldnodenum()); m < layer.nodenum(); ++m) { // skip node n >= m or they are both old nodes.
             //    isPrior[l][n][m] = mp.addVar(MpSolver::VariableType::Bool, 0, 1, 0);
